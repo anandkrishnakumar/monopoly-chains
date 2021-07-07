@@ -9,14 +9,12 @@ DECK2_Pos = [7,22,36]
 
 #The deck consists of positions that you could move to and their
 #respective probability, -1 would be not moving (at end of list).
-DECK1 = np.array([[0,0.5],[-1,0.5]])
-DECK2 = np.array([[0,0.5],[-1,0.5]])
-
+#going back 3 steps is -3 XD
+DECK1 = np.array([[0,1/16],[30,1/16],[-1,14/16]])#CHEST
+DECK2 = np.array([[0,1/16],[11,1/16],[30,1/16],[15,1/16],[39,1/16],[24,1/16],[-3,1/16],[-1,9/16]])
 #Ways to roll an their probs
 DRolls = np.array([2,3,4,5,6,7,8,9,10,11,12])
 DProbs = np.array([1,2,3,4,5,6,5,4,3,2,1])/36
-print(DProbs[0]*36)
-print(len(DProbs))
 
 
 
@@ -34,7 +32,7 @@ for i in range(40):
             #print(j)
             #print(DProbs[k]*36)
             P[i,j%40] = DProbs[k]
-        #now consider landing on chance/chest
+        #now consider landing on chest/chance
         for pos in DECK1_Pos:
             if P[i,pos]>0:
                 for pair in DECK1:
@@ -45,18 +43,21 @@ for i in range(40):
         for pos in DECK2_Pos:
             if P[i,pos]>0:
                 for pair in DECK2:
-                    if pair[0] != -1:
+                    if pair[0] != -1 and pair[0] != -3:
                         P[i,int(pair[0])] += pair[1]*P[i,pos]
+                    elif pair[0] == -3: #go back 3 steps
+                        P[i,pos-3] += pair[1]*P[i,pos]
                     elif pair[0] == -1:
                         P[i,pos] = pair[1]*P[i,pos]
                         
 
                 
-print(P[0])
+#print(P[0])
             
 #Probability of rolling a double
 Pdouble = 1/6
 PNdouble = 5/6
+
 
 #Now lets consider JAIL
 
@@ -69,8 +70,7 @@ for spot in JailSpots:
 P[30,40] = 5/6
 P[40,41] = 5/6
 P[41,10] = 5/6 #back to visiting
-
-print(P[40])
+#print(P[40])
 
 
 #NOW lets look for the STATIONARY DISTN
@@ -78,8 +78,8 @@ print(P[40])
 print(np.linalg.eig(P)[0][0]) #END UP WITH 1 BEING AN EVAL XD
 
 v1 = np.linalg.eig(P.T)[1][:,0]
-print(v1)
-print(sum(v1.real))
+#print(v1)
+#print(sum(v1.real))
 
 
 #FINAL normalised stationary distn.
@@ -88,6 +88,9 @@ norm_const = sum(v1r)
 print(v1r/norm_const)
 
 FinalProbs = v1r/norm_const
+
+print(FinalProbs[30]+FinalProbs[40]+FinalProbs[41])
+print(FinalProbs[10])
 
 
     
