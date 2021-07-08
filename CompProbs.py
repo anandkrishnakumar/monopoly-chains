@@ -1,5 +1,9 @@
 #!/usr/bin/env python3
 
+#TODO
+# Add Jail
+# Dynamic plots
+
 # Import the random package
 import random
 
@@ -93,9 +97,13 @@ class MonopolySimulation:
 
         # A list to contain the total value rolled.
         self.counters=[0.]*self.nsquares
+        self.just_visiting = 0
 
         # A variable to hold the current position
         self.currentPosition = 0
+        
+        # A variable to keep track if in jail
+        self.inJail = 0
 
     #-----------------------------------------------
 
@@ -124,7 +132,6 @@ class MonopolySimulation:
         # These are all commands to go to a square
         communityChestResults += [ (0, 0) ] # Advance to GO
         communityChestResults += [ (0, 10) ] # Go to Jail
-        communityChestResults += [ (2, 0) ] # Pay 10 pounds or take a chance
 
         # Now create the deck of cards
         self.communityChestDeck = Deck(16, communityChestResults) # There are sixteen cards in the deck.
@@ -135,6 +142,13 @@ class MonopolySimulation:
     def movePlayer(self):
         # roll the dice
         totalValue = rollTwoDice()
+        
+        if self.inJail == 1:
+            if totalValue < 12:
+                self.inJail += 1
+                return
+                
+                
 
         # Move the player to the next position
         self.currentPosition = self.currentPosition + totalValue
@@ -148,6 +162,8 @@ class MonopolySimulation:
 
         # Count the current position on the board
         self.counters[self.currentPosition] = self.counters[self.currentPosition] + 1.
+        if self.currentPosition == 10:
+            self.just_visiting += 1
 
     #-----------------------------------------------
 
@@ -169,12 +185,6 @@ class MonopolySimulation:
         elif typeOfAction == 1:
             self.currentPosition = self.currentPosition + setting
             self.counters[self.currentPosition] = self.counters[self.currentPosition] + 1.    # Count the current position
-            return
-
-        # A command to take a chance
-        elif typeOfAction == 2:
-            if random.random() > 0.5: # Player chooses chance 1/2 the time at random
-                self.evaluateCard(self.chanceDeck.draw())
             return
 
         assert False, "Error: card action %d is out of range" % typeOfAction
@@ -199,6 +209,7 @@ class MonopolySimulation:
         if self.currentPosition == 20:
             self.currentPosition = 10 # Send them to the jail square
             self.counters[self.currentPosition] = self.counters[self.currentPosition] + 1.    # Count the current position
+            self.inJail = 1
             return
 
     #-----------------------------------------------
@@ -234,6 +245,8 @@ if __name__ == "__main__":
         # Need to add one, since Python counts from zero.
         print(" P("+str(i)+")="+str(counters[i]))
     print("where P(n) is the probability of landing on the nth Monopoly board square")
+    
+    print("\nP(Just Visiting)", m.just_visiting/nRolls)
 
     # Create a bar chart display
     plot(range(len(counters)),counters)
