@@ -1,4 +1,5 @@
 import numpy as np
+import matplotlib.pyplot as plt
 
 #there are 40 squares on the board (plus 2 on side for jail wiaiting)
 #first is GO, position 0
@@ -87,10 +88,49 @@ v1r = v1.real
 norm_const = sum(v1r)
 print(v1r/norm_const)
 
-FinalProbs = v1r/norm_const
+Probs = v1r/norm_const
 
-print(FinalProbs[30]+FinalProbs[40]+FinalProbs[41])
-print(FinalProbs[10])
+#print(Probs[30]+Probs[40]+Probs[41])
+#print(Probs[10])
 
 
-    
+
+#Now lets revert back to the actual board
+#namely combining the jail states
+ProbsFinal= Probs[:40]
+ProbsFinal[30]+= Probs[40]+Probs[41]
+
+#Lets rank our probabilities for the tiles
+Names = ['Go','Old Kent Road','Chest 1','Whitechapel Road','Income Tax','Station 1',
+         'The Angel Islington','Chance 1','Euston Road','Pentonville Road','Just Visiting',
+         'Pall Mall','Utility 1','Whitehall','Northumberland Avenue','Station 2',
+         'Bow Street','Chest 2','Marlborough Street','Vine Street','Free Parking',
+         'Strand','Chance 2','Fleet Street','Trafalgar Square','Station 3','Leicester Squre',
+         'Coventry Street','Utility 2','Picadilly','Jail','Regent Street','Oxford Street',
+         'Chest 3','Bond Street','Station4','Chance 3','Park Lane','Super Tax','Mayfair']
+
+Colours = ['lavender','tab:brown','lavender','tab:brown','lavender','k','c','lavender','c','c','lavender','m','lavender','m','m',
+           'k','tab:orange','lavender','tab:orange','tab:orange','lavender','r','lavender','r','r','k','yellow',
+           'yellow','lavender','yellow','lavender','g','g','lavender','g','k','lavender','b','lavender','b']
+
+RankedPositions = np.argsort(ProbsFinal)
+
+RankedProbs = np.zeros(40)
+RankedNames = []
+RankedColours = []
+for i in range(40):
+    RankedProbs[i] = ProbsFinal[RankedPositions[i]]
+    RankedNames.append(Names[RankedPositions[i]])
+    RankedColours.append(Colours[RankedPositions[i]])
+
+
+#Now lets plot our ranked results
+#UNORDERED
+plt.bar(range(len(ProbsFinal)),ProbsFinal,color=Colours)
+plt.xticks(range(len(ProbsFinal)),Names,rotation=90)
+plt.show()
+
+#ORDERED
+plt.bar(range(len(ProbsFinal)),RankedProbs,color=RankedColours)
+plt.xticks(range(len(ProbsFinal)),RankedNames,rotation=90)
+plt.show()
