@@ -1,38 +1,13 @@
 #!/usr/bin/env python3
 
-# Import the random package
 import random
-
 import numpy as np
-# Import the matplotlib pyplot package
 import matplotlib.pyplot as plt
 
 # A function to generate two random numbers within the range 1 <= i <= 6 and add them together
 def rollTwoDice():
     return random.randint(1,6) + random.randint(1,6)
 
-#-------------------------------------------------
-
-# A function to normalise the counters by the sum of the counts
-def normalise(counters):
-
-    # Count the total number of entries
-    total = 0.
-    for counter in counters:
-        total = total + counter
-
-    # Divide each counter value by the total
-    for i in range(len(counters)):
-        counters[i] = counters[i] / total
-
-#-------------------------------------------------
-
-# A function to create a histogram
-def plot(x, y):
-    pyplot.bar(x, y)
-    pyplot.xlabel('Monopoly board square (n)')
-    pyplot.ylabel('Probability of landing on square P(n)')
-    pyplot.show()
 
 #=================================================
 
@@ -97,8 +72,9 @@ class MonopolySimulation:
         # A variable to hold the current position
         self.currentPosition = 0
         
-        # to keep track if in jail
+        # To keep track if in jail
         self.inJail = 0
+        # Frequency counters
         self.jail = 0
         self.just_visiting = 0
 
@@ -141,16 +117,21 @@ class MonopolySimulation:
         # roll the dice
         totalValue = rollTwoDice()
         
+        # jail stuff
         if self.inJail in [1, 2]:
             if totalValue < 12:
                 self.inJail += 1
                 self.jail += 1
                 return
+            elif totalValue == 12:
+                self.inJail = 0
         elif self.inJail == 3:
             if totalValue < 12:
                 self.inJail = 0
                 self.just_visiting += 1
                 return
+            elif totalValue == 12:
+                self.inJail = 0
 
         # Move the player to the next position
         self.currentPosition = self.currentPosition + totalValue
@@ -241,32 +222,19 @@ class MonopolySimulation:
             # and count the square that they land on.
             self.checkAction()
 
+# plays the game with nRolls number of dice rolls and returns the probabilities
 def simulate(nRolls=1000000):
-    # Set the number of rolls
-    nRolls = nRolls
+    nRolls = nRolls # number of rolls
     m = MonopolySimulation()
     m.play(nRolls)
     counters = np.array(m.counters)
     counters[30] = m.jail
     counters[10] = m.just_visiting
     
-    # Total probability is always defined as 1.
-    # Therefore, have to divide by the total number of counted values.
-    # normalise(counters)
-    counters /= nRolls
-    
-    # # Now print out the probabilities for each of the combinations
-    # print("The probabilities of landing on a given Monopoly square after " + str(nRolls) + " rolls")
-    # for i in range(len(counters)):
-    #     # Need to add one, since Python counts from zero.
-    #     print(" P("+str(i)+")="+str(counters[i]))
-    # print("where P(n) is the probability of landing on the nth Monopoly board square")
-    
-    # # Create a bar chart display
-    # plot(range(len(counters)),counters)
-    
+    counters /= nRolls # divide by number of rolls to get probabilities    
     return counters
 
+# returns the probabilities at the end of nth dice roll
 def n_rolls_prob(n):
     simulation_probs = np.zeros((10000, 40))
     for i in range(10000):
@@ -275,7 +243,7 @@ def n_rolls_prob(n):
     return np.mean(simulation_probs, 0)
 
 
-#Lets rank our probabilities for the tiles
+# Tile names and colours used for plots
 Names = ['Go','Old Kent Road','Chest 1','Whitechapel Road','Income Tax','Station 1',
           'The Angel Islington','Chance 1','Euston Road','Pentonville Road','Just Visiting',
           'Pall Mall','Utility 1','Whitehall','Northumberland Avenue','Station 2',
@@ -288,39 +256,41 @@ Colours = ['lavender','tab:brown','lavender','tab:brown','lavender','k','c','lav
             'k','tab:orange','lavender','tab:orange','tab:orange','lavender','r','lavender','r','r','k','yellow',
             'yellow','lavender','yellow','lavender','g','g','lavender','g','k','lavender','b','lavender','b']
 
-##################################### n turns plots
 
-# fig, ax = plt.subplots(2, 2)
-# fig.set_size_inches(34.5, 21.5)
+# PLOTS -------------------------------------------
 
-# probs = n_rolls_prob(1)
-# ax[0, 0].bar(range(len(probs)),probs,color=Colours)
-# ax[0, 0].set_xticks(range(len(probs)))
-# ax[0, 0].set_xticklabels(Names, rotation=90, fontsize=22)
-# ax[0, 0].get_yaxis().set_visible(False)
+#----------------------plots of probs after N turns---------------------------
+fig, ax = plt.subplots(2, 2)
+fig.set_size_inches(34.5, 21.5)
 
-# probs = n_rolls_prob(2)
-# ax[0, 1].bar(range(len(probs)),probs,color=Colours)
-# ax[0, 1].set_xticks(range(len(probs)))
-# ax[0, 1].set_xticklabels(Names, rotation=90, fontsize=22)
-# ax[0, 1].get_yaxis().set_visible(False)
+probs = n_rolls_prob(1)
+ax[0, 0].bar(range(len(probs)),probs,color=Colours)
+ax[0, 0].set_xticks(range(len(probs)))
+ax[0, 0].set_xticklabels(Names, rotation=90, fontsize=22)
+ax[0, 0].get_yaxis().set_visible(False)
 
-# probs = n_rolls_prob(3)
-# ax[1, 0].bar(range(len(probs)),probs,color=Colours)
-# ax[1, 0].set_xticks(range(len(probs)))
-# ax[1, 0].set_xticklabels(Names, rotation=90, fontsize=22)
-# ax[1, 0].get_yaxis().set_visible(False)
+probs = n_rolls_prob(2)
+ax[0, 1].bar(range(len(probs)),probs,color=Colours)
+ax[0, 1].set_xticks(range(len(probs)))
+ax[0, 1].set_xticklabels(Names, rotation=90, fontsize=22)
+ax[0, 1].get_yaxis().set_visible(False)
 
-# probs = n_rolls_prob(4)
-# ax[1, 1].bar(range(len(probs)),probs,color=Colours)
-# ax[1, 1].set_xticks(range(len(probs)))
-# ax[1, 1].set_xticklabels(Names, rotation=90, fontsize=22)
-# ax[1, 1].get_yaxis().set_visible(False)
+probs = n_rolls_prob(3)
+ax[1, 0].bar(range(len(probs)),probs,color=Colours)
+ax[1, 0].set_xticks(range(len(probs)))
+ax[1, 0].set_xticklabels(Names, rotation=90, fontsize=22)
+ax[1, 0].get_yaxis().set_visible(False)
 
-# fig.tight_layout()
-# fig.savefig("4turns_probs.pdf", bbox_inches='tight', pad_inches = 0)
+probs = n_rolls_prob(4)
+ax[1, 1].bar(range(len(probs)),probs,color=Colours)
+ax[1, 1].set_xticks(range(len(probs)))
+ax[1, 1].set_xticklabels(Names, rotation=90, fontsize=22)
+ax[1, 1].get_yaxis().set_visible(False)
+
+fig.tight_layout()
+fig.savefig("4turns_probs.pdf", bbox_inches='tight', pad_inches = 0)
     
-##################################### FINAL PLOT
+#---------------------------Final Plots--------------------------------
 probs = simulate()
 fig, ax = plt.subplots()
 fig.set_size_inches(16.5, 10.5)
