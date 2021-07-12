@@ -52,8 +52,6 @@ for i in range(40):
                         P[i,pos] = pair[1]*P[i,pos]
                         
 
-                
-#print(P[0])
             
 #Probability of rolling a double
 Pdouble = 1/6
@@ -71,7 +69,6 @@ for spot in JailSpots:
 P[30,40] = 5/6
 P[40,41] = 5/6
 P[41,10] = 5/6 #back to visiting
-#print(P[40])
 
 
 #NOW lets look for the STATIONARY DISTN
@@ -79,8 +76,7 @@ P[41,10] = 5/6 #back to visiting
 print(np.linalg.eig(P)[0][0]) #END UP WITH 1 BEING AN EVAL XD
 
 v1 = np.linalg.eig(P.T)[1][:,0]
-#print(v1)
-#print(sum(v1.real))
+
 
 
 #FINAL normalised stationary distn.
@@ -89,10 +85,6 @@ norm_const = sum(v1r)
 print(v1r/norm_const)
 
 Probs = v1r/norm_const
-
-#print(Probs[30]+Probs[40]+Probs[41])
-#print(Probs[10])
-
 
 
 #Now lets revert back to the actual board
@@ -126,11 +118,27 @@ for i in range(40):
 
 #Now lets plot our ranked results
 #UNORDERED
-plt.bar(range(len(ProbsFinal)),ProbsFinal,color=Colours)
-plt.xticks(range(len(ProbsFinal)),Names,rotation=90)
+probs = ProbsFinal
+fig, ax = plt.subplots()
+fig.set_size_inches(16.5, 10.5)
+ax.bar(range(len(probs)), probs, color=Colours)
+ax.set_xticks(range(len(probs)))
+ax.set_xticklabels(Names, rotation=90, fontsize=22)
+ax.tick_params(axis='y', labelsize=22)
+
+fig.tight_layout()
+#fig.savefig("theoretical_probs.pdf", bbox_inches='tight', pad_inches=0)
 plt.show()
 
 #ORDERED
-plt.bar(range(len(ProbsFinal)),RankedProbs,color=RankedColours)
-plt.xticks(range(len(ProbsFinal)),RankedNames,rotation=90)
+probs = RankedProbs
+fig, ax = plt.subplots()
+fig.set_size_inches(16.5, 10.5)
+ax.bar(range(len(probs)), probs, color=RankedColours)
+ax.set_xticks(range(len(probs)))
+ax.set_xticklabels(RankedNames, rotation=90, fontsize=22)
+ax.tick_params(axis='y', labelsize=22)
+
+fig.tight_layout()
+#fig.savefig("theoretical_Rprobs.pdf", bbox_inches='tight', pad_inches=0)
 plt.show()
